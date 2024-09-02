@@ -1,0 +1,68 @@
+
+{% extends "index.html" %}
+
+{% block title %}Blog - Post{% endblock title %}
+{% block blogactive %}active{% endblock blogactive %}
+{% block body %}
+{% load humanize  %}
+<div class="container my-3">
+    <div class="blog-post">
+        <h2 class="blog-post-title">
+            {{post.title}}
+        </h2>
+        <p class="blog-post-meta">
+            {{post.timeStamp}} by <a href="#">{{post.author}}</a>
+        </p>
+        <p>{{post.content}}</p>
+        <hr>
+    </div>
+</div>
+<div class="container">
+    <h2> Comments <small class="text-success">({{comments.count}})</small></h2>
+    {% if user.is_authenticated %}
+    <form action="{% url 'postComment' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="exampleInputEmail">Post Comment</label>
+            <input type="text" class="form-control mx-2" name="comment" placeholder="Enter comment here">
+        </div>
+        <input type="hidden" name="postSno" value="{{post.sno}}">
+        <input type="hidden" name="parentSno" value="">
+        <button type="submit" class="btn btn-primary my-2 mx-3">Submit</button>
+    </form>
+    {% else %}
+    <h4 class="text-warning mx-3">Please login to post a comment!<a href="{% url 'userlogin' %}?next={{ request.path }}">login</a>to post commen</h4>
+    {% endif %}
+    {% for comment in comments %}
+    <div class="row my-3 ">
+        <div class="col-md-1 ">
+            <img class="rounded mx-auto d-block w-100 p-3" src="#"
+                alt="user">
+        </div>
+        <div class="col-md-10 my-3 ">
+            <b class="text-info"> {{ comment.user.username }} </b> - {{comment.timestamp | naturaltime}}
+            <div> {{comment.comment}} </div>
+            <a class="btn btn-outline-primary my-1" data-bs-toggle="collapse" data-bs-target="#reply{{comment.sno}}"
+                aria-expanded="false" aria-controls="collapseExampl">
+                Reply
+            </a>
+        </div>
+
+        <div class="collapse" id="reply{{comment.sno}}">
+            <div class="card card-body mx-5 bg-dark">
+                <form action="{% url 'postComment' %}" method="post">
+                    {% csrf_token%}
+                    <div class="form-group">
+                        <input type="text" class="form-control mx-2" name="comment" placeholder="Reply Here">
+                        <input type="hidden" name="parentSno" value="{{comment.sno}}">
+                    </div>
+                    <input type="hidden" name="postSno" value="{{post.sno}}">
+                    <button type="submit" class="btn btn-primary my-2 mx-3">Submit</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock body %}
+
+
+
